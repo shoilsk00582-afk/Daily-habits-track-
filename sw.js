@@ -1,8 +1,8 @@
-const CACHE_NAME = 'fabulous-clone-v1';
+const CACHE_NAME = 'fabulous-clone-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 // Install event - Cache core assets
