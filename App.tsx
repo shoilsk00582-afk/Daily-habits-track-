@@ -580,6 +580,36 @@ const App = () => {
   const [adviceModal, setAdviceModal] = useState<string | null>(null);
   const [installModalOpen, setInstallModalOpen] = useState(false);
   
+  // PWA Install Prompt Logic
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setDeferredPrompt(null);
+      });
+    } else {
+      setInstallModalOpen(true);
+    }
+  };
+  
   // Notification Logic
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
     typeof Notification !== 'undefined' ? Notification.permission : 'default'
@@ -796,7 +826,7 @@ const App = () => {
             <p className="text-gray-500 text-sm font-medium mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
           </div>
           <div className="flex items-center gap-4">
-              <button onClick={() => setInstallModalOpen(true)} className="p-2 bg-gray-100 rounded-full text-gray-500 hover:text-pink-500 transition-colors" title="Install App">
+              <button onClick={handleInstallClick} className="p-2 bg-gray-100 rounded-full text-gray-500 hover:text-pink-500 transition-colors" title="Install App">
                   <DownloadIcon className="w-5 h-5" />
               </button>
               <div className="text-center">
